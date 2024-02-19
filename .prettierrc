@@ -1,0 +1,6 @@
+{
+  "tabWidth": 4,
+  "arrowParens": "avoid",
+  "disableLanguages": ["css", "sass", "scss", "json"],
+  "trailingComma": "none"
+}
