@@ -10,7 +10,7 @@ void main() {
     // } else {
     //     gl_FragColor = vec4(0.5, 0.5, 1.0, 1.0); // Light blue
     // }
-    gl_FragColor = vec4(0.0, mapRange(vZ, -5.0, 5.0, 0.0, 0.5), mapRange(vZ, -5.0, 5.0, 0.5, 1.0), 1.0);
+    gl_FragColor = vec4(0.0, mapRange(vZ, -10.0, 10.0, 0.0, 0.5), mapRange(vZ, -10.0, 10.0, 0.2, 0.6), 1.0);
     // vec3 color = vec3(0.0);
     // color.r = 0.0;
     // color.g = cos(vUv.y * 10.0 + time) * 0.5 + 0.5;

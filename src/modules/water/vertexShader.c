@@ -11,6 +11,7 @@ void main() {
     pos.z += sin(pos.y * 0.5 + time) * 0.3;
     pos.z += sin(pos.x * 0.3 + pos.y * 0.7 + time) * 0.3;
     pos.z += sin(pos.x * 0.02 + pos.y * 0.02 + time) * 2.1;
+    pos.z += sin(pos.x * 0.02 + pos.y * 0.02 + time) * 2.1;
     pos.z += sin(pos.x * 0.05 + pos.y * 0.05 + time) * 5.1;
     pos.z += sin(pos.x * 0.1 + pos.y * 0.05 + time) * 7.1;
     // pos.z += sin(pos.y * 1.0 + time) * 0.1;
