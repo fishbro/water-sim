@@ -7,6 +7,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // @ts-ignore
 // import {ImprovedNoise} from "three/examples/jsm/math/ImprovedNoise";
 // import * as TWEEN from '@tweenjs/tween.js'
+import fragmentShader from "./fragmentShader.c";
+// @ts-ignore
+import vertexShader from "./vertexShader.c";
 
 export default class SceneConstructor {
     frame;
@@ -23,7 +26,7 @@ export default class SceneConstructor {
     onDemand = false;
     renderFns: Set<Function> = new Set();
     controls: OrbitControls;
-    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(125, 125, 100, 100);
+    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(125 * 5, 125 * 5, 200, 200);
     waterMesh: THREE.Mesh | null = null;
 
 
@@ -33,7 +36,7 @@ export default class SceneConstructor {
             40,
             this.frame.clientWidth / this.frame.clientHeight,
             0.1,
-            250
+            2500
         );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
@@ -71,36 +74,10 @@ export default class SceneConstructor {
             uniforms: {
                 time: { value: 1.0 },
                 resolution: { value: new THREE.Vector2() },
-                uvRate1: { value: new THREE.Vector2(1, 1) }
+                uvRate1: { value: new THREE.Vector2(1.25, 1.25) }
             },
-            vertexShader: [
-                "uniform vec2 uvRate1;",
-                "uniform float time;",
-                "varying vec2 vUv;",
-                "void main() {",
-                "vUv = uvRate1 * uv;",
-                "vec3 pos = position;",
-                "pos.z = sin(pos.x * 0.333 + time) * 1.1;",
-                "pos.z += sin(pos.y * 0.15 + time) * 1.1;",
-                "pos.z += sin(pos.x * 0.24 + pos.y * 0.20 + time) * 1.1;",
-                "pos.z += sin(pos.y * 0.5 + time) * 0.3;",
-                "pos.z += sin(pos.x * 0.3 + pos.y * 0.7 + time) * 0.3;",
-                // "pos.z += sin(pos.y * 1.0 + time) * 0.1;",
-                // "pos.z += sin(pos.x * 1.0 + pos.y * 1.0 + time) * 0.1;",
-                "gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);",
-                "}"
-            ].join("\n"),
-            fragmentShader: [
-                "uniform float time;",
-                "varying vec2 vUv;",
-                "void main() {",
-                "vec3 color = vec3(0.0);",
-                "color.r = sin(vUv.x * 10.0 + time) * 0.5 + 0.5;",
-                "color.g = cos(vUv.y * 10.0 + time) * 0.5 + 0.5;",
-                "color.b = sin(vUv.x * 10.0 + vUv.y * 10.0 + time) * 0.5 + 0.5;",
-                "gl_FragColor = vec4(color, 1.0);",
-                "}"
-            ].join("\n")
+            vertexShader,
+            fragmentShader
         };
 
         const water = new THREE.ShaderMaterial({
