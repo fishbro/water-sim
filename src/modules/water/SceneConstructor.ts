@@ -23,7 +23,7 @@ export default class SceneConstructor {
     onDemand = false;
     renderFns: Set<Function> = new Set();
     controls: OrbitControls;
-    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(80, 80, 100, 100);
+    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(125, 125, 100, 100);
     waterMesh: THREE.Mesh | null = null;
 
 
@@ -33,7 +33,7 @@ export default class SceneConstructor {
             40,
             this.frame.clientWidth / this.frame.clientHeight,
             0.1,
-            150
+            250
         );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
