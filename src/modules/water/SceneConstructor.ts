@@ -23,7 +23,8 @@ export default class SceneConstructor {
     onDemand = false;
     renderFns: Set<Function> = new Set();
     controls: OrbitControls;
-    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
+    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(80, 80, 100, 100);
+    waterMesh: THREE.Mesh | null = null;
 
 
     constructor(frame: HTMLDivElement) {
@@ -65,28 +66,79 @@ export default class SceneConstructor {
         AppStore.events.on("removeSubRender", this.removeSubRender);
     };
 
+    waterShader = () => {
+        const waterShader = {
+            uniforms: {
+                time: { value: 1.0 },
+                resolution: { value: new THREE.Vector2() },
+                uvRate1: { value: new THREE.Vector2(1, 1) }
+            },
+            vertexShader: [
+                "uniform vec2 uvRate1;",
+                "uniform float time;",
+                "varying vec2 vUv;",
+                "void main() {",
+                "vUv = uvRate1 * uv;",
+                "vec3 pos = position;",
+                "pos.z = sin(pos.x * 0.333 + time) * 1.1;",
+                "pos.z += sin(pos.y * 0.15 + time) * 1.1;",
+                "pos.z += sin(pos.x * 0.24 + pos.y * 0.20 + time) * 1.1;",
+                "pos.z += sin(pos.y * 0.5 + time) * 0.3;",
+                "pos.z += sin(pos.x * 0.3 + pos.y * 0.7 + time) * 0.3;",
+                // "pos.z += sin(pos.y * 1.0 + time) * 0.1;",
+                // "pos.z += sin(pos.x * 1.0 + pos.y * 1.0 + time) * 0.1;",
+                "gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);",
+                "}"
+            ].join("\n"),
+            fragmentShader: [
+                "uniform float time;",
+                "varying vec2 vUv;",
+                "void main() {",
+                "vec3 color = vec3(0.0);",
+                "color.r = sin(vUv.x * 10.0 + time) * 0.5 + 0.5;",
+                "color.g = cos(vUv.y * 10.0 + time) * 0.5 + 0.5;",
+                "color.b = sin(vUv.x * 10.0 + vUv.y * 10.0 + time) * 0.5 + 0.5;",
+                "gl_FragColor = vec4(color, 1.0);",
+                "}"
+            ].join("\n")
+        };
+
+        const water = new THREE.ShaderMaterial({
+            uniforms: waterShader.uniforms,
+            vertexShader: waterShader.vertexShader,
+            fragmentShader: waterShader.fragmentShader
+        });
+
+        return water;
+    }
+
     initBase = async () => {
         const scene = this.scene;
         this.scene.add(new THREE.AmbientLight(0x9e9b91, 10));
 
-        const floor = new THREE.Mesh(
-            new THREE.PlaneGeometry(10, 10),
-            new THREE.MeshLambertMaterial({ color: 0x333333 })
+        const water = this.waterMesh = new THREE.Mesh(
+            this.waterGeometry,
+            this.waterShader()
         );
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = -3;
-        scene.add(floor);
+        water.rotation.x = -Math.PI / 2;
+        water.position.y = -2;
+        scene.add(water);
+        // for (let i = 0; i < 3; i++) {
+        //     const clone = water.clone();
+        //     clone.position.x = i * 10;
+        //     scene.add(clone);
+        // }
 
-        const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 1, 1),
-            new THREE.MeshLambertMaterial({ color: 0x00ff00 })
-        );
-        mesh.position.y = -1.5;
-        mesh.castShadow = true;
-        scene.add(mesh);
+        // const mesh = new THREE.Mesh(
+        //     new THREE.BoxGeometry(1, 1, 1),
+        //     new THREE.MeshLambertMaterial({ color: 0x00ff00 })
+        // );
+        // mesh.position.y = -1;
+        // mesh.castShadow = true;
+        // scene.add(mesh);
 
 
-        this.render();
+        this.render(0);
         AppStore.events.emit("ViewLoadingDone");
     };
 
@@ -95,12 +147,18 @@ export default class SceneConstructor {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.frame.clientWidth, this.frame.clientHeight);
 
-        if (this.onDemand) this.render();
+        if (this.onDemand) this.render(0);
     };
 
-    render = (timestamp?: number) => {
+    render = (timestamp: number) => {
         this.renderer.render(this.scene, this.camera);
         // TWEEN.update();
+
+        //update water shader
+        const time = timestamp * 0.001;
+        const floor = this.waterMesh;
+        if(floor)
+        (floor.material as THREE.ShaderMaterial).uniforms.time.value = time;
 
         this.controls.update();
     };
