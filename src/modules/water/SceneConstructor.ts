@@ -10,6 +10,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import fragmentShader from "./fragmentShader.c";
 // @ts-ignore
 import vertexShader from "./vertexShader.c";
+import SkyConstructor from "modules/water/SkyConstructor";
 
 export default class SceneConstructor {
     frame;
@@ -93,6 +94,20 @@ export default class SceneConstructor {
         const scene = this.scene;
         this.scene.add(new THREE.AmbientLight(0x9e9b91, 10));
 
+        const skyController = {
+            turbidity: 10,
+            rayleigh: 3,
+            mieCoefficient: 0.005,
+            mieDirectionalG: 0.7,
+            elevation: 1,
+            azimuth: 195,
+            exposure: this.renderer.toneMappingExposure
+        };
+
+        const skyConstructor = new SkyConstructor(this.renderer, skyController);
+        const sky = skyConstructor.sky;
+        this.scene.add(sky);
+
         const water = this.waterMesh = new THREE.Mesh(
             this.waterGeometry,
             this.waterShader()
@@ -106,13 +121,13 @@ export default class SceneConstructor {
         //     scene.add(clone);
         // }
 
-        // const mesh = new THREE.Mesh(
-        //     new THREE.BoxGeometry(1, 1, 1),
-        //     new THREE.MeshLambertMaterial({ color: 0x00ff00 })
-        // );
-        // mesh.position.y = -1;
-        // mesh.castShadow = true;
-        // scene.add(mesh);
+        const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(10, 10, 10),
+            new THREE.MeshLambertMaterial({ color: 0x00ff00 })
+        );
+        mesh.position.y = 20;
+        mesh.castShadow = true;
+        scene.add(mesh);
 
 
         this.render(0);
