@@ -15,7 +15,7 @@ export default class SceneConstructor {
     frame;
     active = true;
     scene = new THREE.Scene();
-    camDef = new THREE.Vector3(0, 0, 5);
+    camDef = new THREE.Vector3(0, 15, 300);
     camera;
     renderer: WebGLRenderer = new WebGLRenderer({
         antialias: false,
