@@ -27,7 +27,7 @@ export default class SceneConstructor {
     onDemand = false;
     renderFns: Set<Function> = new Set();
     controls: OrbitControls;
-    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(125 * 5, 125 * 5, 200, 200);
+    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(125 * 5, 125 * 5, 400, 400);
     waterMesh: THREE.Mesh | null = null;
 
 
@@ -77,7 +77,7 @@ export default class SceneConstructor {
         return sun.setFromSphericalCoords(1, phi, theta);
     }
 
-    waterShader = (sunPosition: THREE.Vector3, cameraPosition: THREE.Vector3) => {
+    waterShader = (sunPosition: THREE.Vector3, cameraPosition: THREE.Vector3, cameraTarget: THREE.Vector3) => {
         const waterShader = {
             uniforms: {
                 time: { value: 1.0 },
@@ -85,6 +85,7 @@ export default class SceneConstructor {
                 uvRate1: { value: new THREE.Vector2(1.25, 1.25) },
                 sunPosition: { value: sunPosition }, // Pass sun position as a uniform
                 cameraPos: { value: cameraPosition }, // Pass camera position as a uniform
+                cameraTarget: { value: cameraTarget }, // Pass camera target as a uniform
                 reflectionTexture: { value: null }, // Reflection texture
                 refractionTexture: { value: null } // Refraction texture
             },
@@ -131,10 +132,11 @@ export default class SceneConstructor {
 
         const water = this.waterMesh = new THREE.Mesh(
             this.waterGeometry,
-            this.waterShader(sunPosition, this.camera.position)
+            this.waterShader(sunPosition, this.camera.position, this.controls.target)
         );
         water.rotation.x = -Math.PI / 2;
         water.position.y = -2;
+        water.rotation.z = Math.PI / 2;
         scene.add(water);
         // for (let i = 0; i < 3; i++) {
         //     const clone = water.clone();
@@ -166,6 +168,9 @@ export default class SceneConstructor {
             this.renderer.render(scene, this.camera);
             this.renderer.setRenderTarget(null);
             water.visible = true;
+
+            (water.material as THREE.ShaderMaterial).uniforms.cameraPos.value = this.camera.position;
+            (water.material as THREE.ShaderMaterial).uniforms.cameraTarget.value = this.controls.target;
         }
 
         calcTextures();

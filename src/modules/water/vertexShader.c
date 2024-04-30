@@ -2,6 +2,7 @@ uniform vec2 uvRate1;
 uniform float time;
 uniform vec3 sunPosition;
 uniform vec3 cameraPos; // Rename from cameraPosition to avoid redefinition
+uniform vec3 cameraTarget; // Add cameraTarget uniform
 
 varying vec2 vUv;
 varying float vZ;

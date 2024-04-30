@@ -2,10 +2,11 @@ uniform float time;
 uniform vec3 sunPosition;
 uniform sampler2D reflectionTexture;
 uniform sampler2D refractionTexture;
+uniform vec3 cameraPos; // Rename from cameraPosition to avoid redefinition
+uniform vec3 cameraTarget; // Add cameraTarget varying
 
 varying vec2 vUv;
 varying float vZ;
-varying vec3 cameraPos; // Rename from cameraPosition to avoid redefinition
 
 // Function to calculate the reflection vector
 vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
@@ -37,7 +38,7 @@ void main() {
     vec3 incident = normalize(sunPosition - vec3(vUv, waterLevel));
 
     // Calculate reflection and refraction vectors
-    vec3 reflection = calculateReflection(normal, incident, cameraPosition);
+    vec3 reflection = calculateReflection(normal, incident, cameraPos);
     vec3 refraction = calculateRefraction(normal, incident, 1.0 / waterRefractionIndex);
 
     // Calculate the fresnel term (reflection coefficient)
