@@ -11,12 +11,13 @@ import fragmentShader from "./fragmentShader.c";
 // @ts-ignore
 import vertexShader from "./vertexShader.c";
 import SkyConstructor from "modules/water/SkyConstructor";
+import { VertexNormalsHelper } from 'three/addons/helpers/VertexNormalsHelper.js';
 
 export default class SceneConstructor {
     frame;
     active = true;
     scene = new THREE.Scene();
-    camDef = new THREE.Vector3(0, 15, 300);
+    camDef = new THREE.Vector3(0, 15, -300);
     camera;
     renderer: WebGLRenderer = new WebGLRenderer({
         antialias: false,
@@ -27,7 +28,7 @@ export default class SceneConstructor {
     onDemand = false;
     renderFns: Set<Function> = new Set();
     controls: OrbitControls;
-    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(125 * 5, 125 * 5, 400, 400);
+    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(128 * 8, 128 * 8, 200, 200);
     waterMesh: THREE.Mesh | null = null;
 
 
@@ -40,6 +41,7 @@ export default class SceneConstructor {
             2500
         );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.waterGeometry.rotateX(-Math.PI / 2);
 
         this.init();
         this.initBase();
@@ -77,12 +79,12 @@ export default class SceneConstructor {
         return sun.setFromSphericalCoords(1, phi, theta);
     }
 
-    waterShader = (sunPosition: THREE.Vector3, cameraPosition: THREE.Vector3, cameraTarget: THREE.Vector3) => {
+    waterMaterial = (sunPosition: THREE.Vector3, cameraPosition: THREE.Vector3, cameraTarget: THREE.Vector3) => {
         const waterShader = {
             uniforms: {
-                time: { value: 1.0 },
+                time: { value: 0.0 },
                 resolution: { value: new THREE.Vector2() },
-                uvRate1: { value: new THREE.Vector2(1.25, 1.25) },
+                uvRate1: { value: new THREE.Vector2(1, 1) },
                 sunPosition: { value: sunPosition }, // Pass sun position as a uniform
                 cameraPos: { value: cameraPosition }, // Pass camera position as a uniform
                 cameraTarget: { value: cameraTarget }, // Pass camera target as a uniform
@@ -96,7 +98,7 @@ export default class SceneConstructor {
         const water = new THREE.ShaderMaterial({
             uniforms: waterShader.uniforms,
             vertexShader: waterShader.vertexShader,
-            fragmentShader: waterShader.fragmentShader
+            fragmentShader: waterShader.fragmentShader,
         });
 
         return water;
@@ -106,13 +108,16 @@ export default class SceneConstructor {
         const scene = this.scene;
         this.scene.add(new THREE.AmbientLight(0x9e9b91, 10));
 
+        const xyzHelper = new THREE.AxesHelper(100); //The X axis is red. The Y axis is green. The Z axis is blue.
+        scene.add(xyzHelper);
+
         const skyController = {
             turbidity: 10,
             rayleigh: 3,
             mieCoefficient: 0.005,
             mieDirectionalG: 0.7,
             elevation: 1,
-            azimuth: 195,
+            azimuth: 0,
             exposure: this.renderer.toneMappingExposure
         };
 
@@ -129,26 +134,28 @@ export default class SceneConstructor {
         );
         sunMesh.position.copy(sunPosition);
         scene.add(sunMesh);
+        sunMesh.visible = false;
+
 
         const water = this.waterMesh = new THREE.Mesh(
             this.waterGeometry,
-            this.waterShader(sunPosition, this.camera.position, this.controls.target)
+            this.waterMaterial(sunPosition, this.camera.position, this.controls.target)
         );
-        water.rotation.x = -Math.PI / 2;
-        water.position.y = -2;
-        water.rotation.z = Math.PI / 2;
         scene.add(water);
-        // for (let i = 0; i < 3; i++) {
-        //     const clone = water.clone();
-        //     clone.position.x = i * 10;
-        //     scene.add(clone);
-        // }
 
-        const reflectionTexture = new THREE.WebGLRenderTarget(512, 512);
-        const refractionTexture = new THREE.WebGLRenderTarget(512, 512);
+        const reflectionTexture = new THREE.WebGLRenderTarget(128 * 8, 128 * 8);
+        const refractionTexture = new THREE.WebGLRenderTarget(128 * 8, 128 * 8);
         (water.material as THREE.ShaderMaterial).uniforms.reflectionTexture.value = reflectionTexture.texture;
         (water.material as THREE.ShaderMaterial).uniforms.refractionTexture.value = refractionTexture.texture;
 
+        // const reflectionHelper = new THREE.Mesh(
+        //     new THREE.PlaneGeometry(128, 80),
+        //     new THREE.MeshBasicMaterial({ map: reflectionTexture.texture, side: THREE.DoubleSide})
+        // );
+        // reflectionHelper.position.y = 40;
+        // reflectionHelper.position.x = 0;
+        // reflectionHelper.position.z = 0;
+        // scene.add(reflectionHelper);
 
         const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(10, 10, 10),
@@ -158,7 +165,9 @@ export default class SceneConstructor {
         mesh.castShadow = true;
         scene.add(mesh);
 
-        const calcTextures = () => {
+        const calcTextures = (timestamp: number) => {
+            const time = timestamp * 0.001;
+            // reflectionHelper.visible = false;
             water.visible = false;
             this.renderer.setRenderTarget(reflectionTexture);
             this.renderer.render(scene, this.camera);
@@ -167,13 +176,16 @@ export default class SceneConstructor {
             this.renderer.setRenderTarget(refractionTexture);
             this.renderer.render(scene, this.camera);
             this.renderer.setRenderTarget(null);
+            // reflectionHelper.visible = true;
             water.visible = true;
 
+            (water.material as THREE.ShaderMaterial).uniforms.time.value = time;
+            (water.material as THREE.ShaderMaterial).uniforms.cameraPos.value = this.camera.position;
             (water.material as THREE.ShaderMaterial).uniforms.cameraPos.value = this.camera.position;
             (water.material as THREE.ShaderMaterial).uniforms.cameraTarget.value = this.controls.target;
         }
 
-        calcTextures();
+        calcTextures(0);
         this.addSubRender(calcTextures);
 
         this.render(0);
@@ -191,14 +203,6 @@ export default class SceneConstructor {
     render = (timestamp: number) => {
         this.renderer.render(this.scene, this.camera);
         // TWEEN.update();
-
-        //update water shader
-        const time = timestamp * 0.001;
-        const water = this.waterMesh;
-        if(water) {
-            (water.material as THREE.ShaderMaterial).uniforms.time.value = time;
-            (water.material as THREE.ShaderMaterial).uniforms.cameraPos.value = this.camera.position;
-        }
 
         this.controls.update();
     };

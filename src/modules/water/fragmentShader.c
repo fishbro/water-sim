@@ -6,11 +6,11 @@ uniform vec3 cameraPos; // Rename from cameraPosition to avoid redefinition
 uniform vec3 cameraTarget; // Add cameraTarget varying
 
 varying vec2 vUv;
-varying float vZ;
+varying vec3 vPos;
 
 // Function to calculate the reflection vector
 vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
-    vec3 viewDir = normalize(cameraPos - vec3(vUv, vZ));
+    vec3 viewDir = normalize(cameraPos - vec3(vUv, vPos.y));
     return reflect(viewDir, normal);
 }
 
@@ -28,11 +28,13 @@ void main() {
     float waterDepth = 10.0; // Adjust as needed
     float waterRefractionIndex = 1.33; // Typical value for water
 
-    // Calculate view direction
-    vec3 viewDir = normalize(vec3(0.0, 0.0, 1.0)); // Assuming camera looks down the positive z-axis
+    // Calculate the normal vector
+    vec3 dX = dFdx(vPos);
+    vec3 dY = dFdy(vPos);
+    vec3 normal = normalize(cross(dX, dY));
 
-    // Calculate surface normal
-    vec3 normal = normalize(vec3(dFdx(vUv.x), dFdy(vUv.y), 1.0));
+    // Calculate view direction
+    vec3 viewDir = normalize(cameraPos - vec3(vUv, waterLevel));
 
     // Calculate incident light direction from the sun
     vec3 incident = normalize(sunPosition - vec3(vUv, waterLevel));
@@ -57,9 +59,9 @@ void main() {
     waterColor += sunIntensity * sunColor;
 
     // Apply fog effect based on depth
-    float fogAmount = smoothstep(0.0, waterDepth, -vZ);
-    vec3 fogColor = vec3(0.7, 0.8, 1.0); // Adjust for color
-    waterColor = mix(waterColor, fogColor, fogAmount);
+//     float fogAmount = smoothstep(0.0, waterDepth, -vPos.y);
+//     vec3 fogColor = vec3(0.7, 0.8, 1.0); // Adjust for color
+//     waterColor = mix(waterColor, fogColor, fogAmount);
 
     gl_FragColor = vec4(waterColor, 1.0);
 }
