@@ -38,7 +38,7 @@ export default class SceneConstructor {
             40,
             this.frame.clientWidth / this.frame.clientHeight,
             0.1,
-            2500
+            6000
         );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.waterGeometry.rotateX(-Math.PI / 2);
@@ -108,15 +108,15 @@ export default class SceneConstructor {
         const scene = this.scene;
         this.scene.add(new THREE.AmbientLight(0x9e9b91, 10));
 
-        const xyzHelper = new THREE.AxesHelper(100); //The X axis is red. The Y axis is green. The Z axis is blue.
-        scene.add(xyzHelper);
+        // const xyzHelper = new THREE.AxesHelper(100); //The X axis is red. The Y axis is green. The Z axis is blue.
+        // scene.add(xyzHelper);
 
         const skyController = {
-            turbidity: 10,
-            rayleigh: 3,
+            turbidity: 0,
+            rayleigh: 0.15,
             mieCoefficient: 0.005,
             mieDirectionalG: 0.7,
-            elevation: 1,
+            elevation: 15,
             azimuth: 0,
             exposure: this.renderer.toneMappingExposure
         };
@@ -157,13 +157,13 @@ export default class SceneConstructor {
         // reflectionHelper.position.z = 0;
         // scene.add(reflectionHelper);
 
-        const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(10, 10, 10),
-            new THREE.MeshLambertMaterial({ color: 0x00ff00 })
-        );
-        mesh.position.y = 20;
-        mesh.castShadow = true;
-        scene.add(mesh);
+        // const mesh = new THREE.Mesh(
+        //     new THREE.BoxGeometry(10, 10, 10),
+        //     new THREE.MeshLambertMaterial({ color: 0x00ff00 })
+        // );
+        // mesh.position.y = 20;
+        // mesh.castShadow = true;
+        // scene.add(mesh);
 
         const calcTextures = (timestamp: number) => {
             const time = timestamp * 0.001;

@@ -22,11 +22,16 @@ vec3 calculateRefraction(vec3 normal, vec3 incident, float eta) {
     return eta * incident - (eta * cosI + sqrt(cosT2)) * normal;
 }
 
+float mapRange(float value, float minInput, float maxInput, float minOutput, float maxOutput) {
+    return minOutput + (maxOutput - minOutput) * (value - minInput) / (maxInput - minInput);
+}
+
 void main() {
     // Define water properties
     float waterLevel = 0.0; // Adjust as needed
     float waterDepth = 10.0; // Adjust as needed
     float waterRefractionIndex = 1.33; // Typical value for water
+    vec3 baseColor = vec3(0.0, mapRange(vPos.y, -10.0, 10.0, 0.0, 0.5), mapRange(vPos.y, -10.0, 10.0, 0.2, 0.6));
 
     // Calculate the normal vector
     vec3 dX = dFdx(vPos);
@@ -63,5 +68,5 @@ void main() {
 //     vec3 fogColor = vec3(0.7, 0.8, 1.0); // Adjust for color
 //     waterColor = mix(waterColor, fogColor, fogAmount);
 
-    gl_FragColor = vec4(waterColor, 1.0);
+    gl_FragColor = vec4(mix(waterColor, baseColor, 0.5), 1.0);
 }

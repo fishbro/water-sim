@@ -38,7 +38,7 @@ export default class SkyConstructor {
         const effectController = this.options;
 
         const sky = new Sky();
-        sky.scale.setScalar(500);
+        sky.scale.setScalar(5000);
 
         const sun = new THREE.Vector3();
 
