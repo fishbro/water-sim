@@ -9,9 +9,20 @@ varying vec2 vUv;
 varying vec3 vPos;
 
 // Function to calculate the reflection vector
+// vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
+//     vec3 viewDir = normalize(cameraPos - vec3(vUv, vPos.y));
+//     return reflect(viewDir, normal);
+// }
+
 vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
-    vec3 viewDir = normalize(cameraPos - vec3(vUv, vPos.y));
-    return reflect(viewDir, normal);
+    //move reflections slightly to avoid artifacts
+    vec3 reflection = reflect(incident, normal);
+    vec3 viewDir = normalize(cameraPos - vec3(vUv, 0.0));
+    float cosAlpha = dot(normalize(reflection), viewDir);
+    if (cosAlpha < 0.0) {
+        reflection = reflect(-incident, normal);
+    }
+    return reflection;
 }
 
 // Function to calculate the refraction vector
@@ -56,6 +67,7 @@ void main() {
     vec3 reflectedColor = texture2D(reflectionTexture, reflect(vUv, reflection.xy)).rgb; // Adjust texture as needed
     vec3 refractedColor = texture2D(refractionTexture, refraction.xy).rgb; // Adjust texture as needed
     vec3 waterColor = mix(refractedColor, reflectedColor, fresnel);
+//     vec3 waterColor = reflectedColor;
 
     // Apply sun effect
     float sunIntensity = max(0.0, dot(normalize(sunPosition - vec3(vUv, waterLevel)), -reflection));

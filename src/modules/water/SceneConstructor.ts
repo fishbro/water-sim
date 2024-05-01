@@ -28,7 +28,7 @@ export default class SceneConstructor {
     onDemand = false;
     renderFns: Set<Function> = new Set();
     controls: OrbitControls;
-    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(128 * 8, 128 * 8, 200, 200);
+    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(128 * 8, 128 * 8, 400, 400);
     waterMesh: THREE.Mesh | null = null;
 
 
@@ -116,7 +116,7 @@ export default class SceneConstructor {
             rayleigh: 0.15,
             mieCoefficient: 0.005,
             mieDirectionalG: 0.7,
-            elevation: 15,
+            elevation: 7,
             azimuth: 0,
             exposure: this.renderer.toneMappingExposure
         };
@@ -157,13 +157,20 @@ export default class SceneConstructor {
         // reflectionHelper.position.z = 0;
         // scene.add(reflectionHelper);
 
-        // const mesh = new THREE.Mesh(
-        //     new THREE.BoxGeometry(10, 10, 10),
-        //     new THREE.MeshLambertMaterial({ color: 0x00ff00 })
-        // );
-        // mesh.position.y = 20;
-        // mesh.castShadow = true;
-        // scene.add(mesh);
+        const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(10, 10, 10),
+            new THREE.MeshLambertMaterial({ color: 0x00ff00 })
+        );
+        mesh.position.y = 20;
+        mesh.castShadow = true;
+        scene.add(mesh);
+        for (let i = 0; i < 10; i++) {
+            const clone = mesh.clone();
+            clone.position.x = Math.random() * 100 - 50;
+            // clone.position.y = Math.random() * 100 - 50;
+            clone.position.z = Math.random() * 100 - 50;
+            scene.add(clone);
+        }
 
         const calcTextures = (timestamp: number) => {
             const time = timestamp * 0.001;
