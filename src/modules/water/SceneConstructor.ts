@@ -17,7 +17,7 @@ export default class SceneConstructor {
     frame;
     active = true;
     scene = new THREE.Scene();
-    camDef = new THREE.Vector3(0, 15, -300);
+    camDef = new THREE.Vector3(0, 30, -500);
     camera;
     renderer: WebGLRenderer = new WebGLRenderer({
         antialias: false,
@@ -28,7 +28,7 @@ export default class SceneConstructor {
     onDemand = false;
     renderFns: Set<Function> = new Set();
     controls: OrbitControls;
-    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(128 * 8, 128 * 8, 400, 400);
+    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(128 * 8, 128 * 8, 300, 300);
     waterMesh: THREE.Mesh | null = null;
 
 

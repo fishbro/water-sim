@@ -9,21 +9,21 @@ varying vec2 vUv;
 varying vec3 vPos;
 
 // Function to calculate the reflection vector
-// vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
-//     vec3 viewDir = normalize(cameraPos - vec3(vUv, vPos.y));
-//     return reflect(viewDir, normal);
-// }
-
 vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
-    //move reflections slightly to avoid artifacts
-    vec3 reflection = reflect(incident, normal);
-    vec3 viewDir = normalize(cameraPos - vec3(vUv, 0.0));
-    float cosAlpha = dot(normalize(reflection), viewDir);
-    if (cosAlpha < 0.0) {
-        reflection = reflect(-incident, normal);
-    }
-    return reflection;
+    vec3 viewDir = normalize(cameraPos - vec3(vUv, vPos.y));
+    return reflect(viewDir, normal);
 }
+
+// vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
+//     //move reflections slightly to avoid artifacts
+//     vec3 reflection = reflect(incident, normal);
+//     vec3 viewDir = normalize(cameraPos - vec3(vUv, 0.0));
+//     float cosAlpha = dot(normalize(reflection), viewDir);
+//     if (cosAlpha < 0.0) {
+//         reflection = reflect(-incident, normal);
+//     }
+//     return reflection;
+// }
 
 // Function to calculate the refraction vector
 vec3 calculateRefraction(vec3 normal, vec3 incident, float eta) {
