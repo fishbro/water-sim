@@ -21,14 +21,14 @@ export default class SceneConstructor {
     camera;
     renderer: WebGLRenderer = new WebGLRenderer({
         antialias: false,
-        powerPreference: "high-performance"
+        powerPreference: "high-performance",
         // precision: "lowp",
         // depth: false,
     });
     onDemand = false;
     renderFns: Set<Function> = new Set();
     controls: OrbitControls;
-    waterGeometry: THREE.PlaneGeometry = new THREE.PlaneGeometry(128 * 8, 128 * 8, 300, 300);
+    waterGeometry: THREE.PlaneGeometry;
     waterMesh: THREE.Mesh | null = null;
 
 
@@ -41,6 +41,7 @@ export default class SceneConstructor {
             6000
         );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.waterGeometry = new THREE.PlaneGeometry(128 * 8, 128 * 8, 300, 300);
         this.waterGeometry.rotateX(-Math.PI / 2);
 
         this.init();
@@ -161,15 +162,17 @@ export default class SceneConstructor {
             new THREE.BoxGeometry(10, 10, 10),
             new THREE.MeshLambertMaterial({ color: 0x00ff00 })
         );
-        mesh.position.y = 20;
+        mesh.position.y = 40;
         mesh.castShadow = true;
         scene.add(mesh);
+        const meshes = [mesh];
         for (let i = 0; i < 10; i++) {
             const clone = mesh.clone();
-            clone.position.x = Math.random() * 100 - 50;
+            clone.position.x = Math.random() * 500 - 250;
             // clone.position.y = Math.random() * 100 - 50;
-            clone.position.z = Math.random() * 100 - 50;
+            clone.position.z = Math.random() * 500 - 250;
             scene.add(clone);
+            meshes.push(clone);
         }
 
         const calcTextures = (timestamp: number) => {
@@ -190,6 +193,12 @@ export default class SceneConstructor {
             (water.material as THREE.ShaderMaterial).uniforms.cameraPos.value = this.camera.position;
             (water.material as THREE.ShaderMaterial).uniforms.cameraPos.value = this.camera.position;
             (water.material as THREE.ShaderMaterial).uniforms.cameraTarget.value = this.controls.target;
+
+            meshes.forEach(mesh => {
+                mesh.rotation.y = time;
+                mesh.translateY(Math.sin(time) * 0.1);
+            });
+
         }
 
         calcTextures(0);

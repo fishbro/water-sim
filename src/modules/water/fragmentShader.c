@@ -25,6 +25,28 @@ vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
 //     return reflection;
 // }
 
+//calculate camera y angle
+float getCameraYAngle(vec3 cameraPos, vec3 cameraTarget) {
+    vec3 cameraDirection = normalize(cameraTarget - cameraPos);
+    return atan(cameraDirection.z, cameraDirection.x);
+}
+
+
+vec2 rotateCoords(vec2 vUv){
+    // Define the center of rotation (u, v)
+    vec2 center = vec2(0.5, 0.5); // You can adjust this as needed
+
+    // Define the angle of rotation in radians
+//     float angle = radians(180.0); // You can change the angle as needed
+    float angle = getCameraYAngle(cameraPos, cameraTarget) + radians(90.0);
+
+    // Calculate the rotated texture coordinates
+    float s = sin(angle);
+    float c = cos(angle);
+    vec2 rotatedUV = vec2(vUv.x - center.x, vUv.y - center.y);
+    return vec2(rotatedUV.x * c - rotatedUV.y * s, rotatedUV.x * s + rotatedUV.y * c + 0.05) + center;
+}
+
 // Function to calculate the refraction vector
 vec3 calculateRefraction(vec3 normal, vec3 incident, float eta) {
     float cosI = dot(normal, incident);
@@ -64,7 +86,8 @@ void main() {
     float fresnel = mix(0.1, 1.0, pow(1.0 - cosTheta, 5.0)); // Adjust as needed
 
     // Calculate final color based on reflection and refraction
-    vec3 reflectedColor = texture2D(reflectionTexture, reflect(vUv, reflection.xy)).rgb; // Adjust texture as needed
+//     vec3 reflectedColor = texture2D(reflectionTexture, vec2(1.0 - vUv.x, vUv.y)).rgb; // Adjust texture as needed
+    vec3 reflectedColor = texture2D(reflectionTexture, rotateCoords(vUv)).rgb; // Adjust texture as needed
     vec3 refractedColor = texture2D(refractionTexture, refraction.xy).rgb; // Adjust texture as needed
     vec3 waterColor = mix(refractedColor, reflectedColor, fresnel);
 //     vec3 waterColor = reflectedColor;
