@@ -37,7 +37,7 @@ vec2 rotateCoords(vec2 vUv){
     vec2 center = vec2(0.5, 0.5); // You can adjust this as needed
 
     // Define the angle of rotation in radians
-//     float angle = radians(180.0); // You can change the angle as needed
+    // float angle = radians(180.0); // You can change the angle as needed
     float angle = getCameraYAngle(cameraPos, cameraTarget) + radians(90.0);
 
     // Calculate the rotated texture coordinates
@@ -86,11 +86,11 @@ void main() {
     float fresnel = mix(0.1, 1.0, pow(1.0 - cosTheta, 5.0)); // Adjust as needed
 
     // Calculate final color based on reflection and refraction
-//     vec3 reflectedColor = texture2D(reflectionTexture, vec2(1.0 - vUv.x, vUv.y)).rgb; // Adjust texture as needed
+    // vec3 reflectedColor = texture2D(reflectionTexture, vec2(1.0 - vUv.x, vUv.y)).rgb; // Adjust texture as needed
     vec3 reflectedColor = texture2D(reflectionTexture, rotateCoords(vUv)).rgb; // Adjust texture as needed
     vec3 refractedColor = texture2D(refractionTexture, refraction.xy).rgb; // Adjust texture as needed
     vec3 waterColor = mix(refractedColor, reflectedColor, fresnel);
-//     vec3 waterColor = reflectedColor;
+    // vec3 waterColor = reflectedColor;
 
     // Apply sun effect
     float sunIntensity = max(0.0, dot(normalize(sunPosition - vec3(vUv, waterLevel)), -reflection));
@@ -99,9 +99,9 @@ void main() {
     waterColor += sunIntensity * sunColor;
 
     // Apply fog effect based on depth
-//     float fogAmount = smoothstep(0.0, waterDepth, -vPos.y);
-//     vec3 fogColor = vec3(0.7, 0.8, 1.0); // Adjust for color
-//     waterColor = mix(waterColor, fogColor, fogAmount);
+    // float fogAmount = smoothstep(0.0, waterDepth, -vPos.y);
+    // vec3 fogColor = vec3(0.7, 0.8, 1.0); // Adjust for color
+    // waterColor = mix(waterColor, fogColor, fogAmount);
 
     gl_FragColor = vec4(mix(waterColor, baseColor, 0.5), 1.0);
 }
