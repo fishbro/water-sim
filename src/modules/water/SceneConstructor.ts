@@ -7,9 +7,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // @ts-ignore
 // import {ImprovedNoise} from "three/examples/jsm/math/ImprovedNoise";
 // import * as TWEEN from '@tweenjs/tween.js'
-import fragmentShader from "./fragmentShader.c";
+import fragmentShader from "./fragmentShader.glsl";
 // @ts-ignore
-import vertexShader from "./vertexShader.c";
+import vertexShader from "./vertexShader.glsl";
 import SkyConstructor from "modules/water/SkyConstructor";
 import { VertexNormalsHelper } from 'three/addons/helpers/VertexNormalsHelper.js';
 

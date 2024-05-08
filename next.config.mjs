@@ -3,7 +3,7 @@ const nextConfig = {
     webpack: (config, { isServer }) => {
         // Add raw-loader for .c files
         config.module.rules.push({
-            test: /\.c$/,
+            test: /\.glsl$/,
             use: 'raw-loader'
         });
 
