@@ -1,8 +1,7 @@
 import * as THREE from "three";
 import { WebGLRenderer } from "three";
 import AppStore from "store/AppStore";
-// @ts-ignore
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import fragmentShader from "./fragmentShader.glsl";
 import vertexShader from "./vertexShader.glsl";
 import SkyConstructor from "modules/water/SkyConstructor";
@@ -90,13 +89,11 @@ export default class SceneConstructor {
             fragmentShader
         };
 
-        const water = new THREE.ShaderMaterial({
+        return new THREE.ShaderMaterial({
             uniforms: waterShader.uniforms,
             vertexShader: waterShader.vertexShader,
             fragmentShader: waterShader.fragmentShader,
         });
-
-        return water;
     }
 
     initBase = async () => {
@@ -210,7 +207,7 @@ export default class SceneConstructor {
         if (this.onDemand) this.render(0);
     };
 
-    render = (timestamp: number) => {
+    render = (_timestamp: number) => {
         this.renderer.render(this.scene, this.camera);
         // TWEEN.update();
 
@@ -235,7 +232,6 @@ export default class SceneConstructor {
 
     destroy = () => {
         this.active = false;
-        const { frame } = this;
         AppStore.events.off("addSubRender", this.addSubRender);
         AppStore.events.off("removeSubRender", this.removeSubRender);
 
