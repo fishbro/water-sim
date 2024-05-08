@@ -3,10 +3,13 @@ uniform vec3 uSunPosition;
 uniform sampler2D uReflectionTexture;
 uniform sampler2D uRefractionTexture;
 uniform vec3 uCameraPos; // Rename from cameraPosition to avoid redefinition
-uniform vec3 uCameraTarget; // Add cameraTarget varying
+uniform vec3 uCameraTarget; // Add cameraTarget uniform
+uniform vec2 uViewSize;
 
 varying vec2 vUv;
 varying vec3 vPos;
+
+const float PI = 3.14159265359;
 
 // Function to calculate the reflection vector
 vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
@@ -14,37 +17,23 @@ vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
     return reflect(viewDir, normal);
 }
 
-// vec3 calculateReflection(vec3 normal, vec3 incident, vec3 cameraPos) {
-//     //move reflections slightly to avoid artifacts
-//     vec3 reflection = reflect(incident, normal);
-//     vec3 viewDir = normalize(cameraPos - vec3(vUv, 0.0));
-//     float cosAlpha = dot(normalize(reflection), viewDir);
-//     if (cosAlpha < 0.0) {
-//         reflection = reflect(-incident, normal);
-//     }
-//     return reflection;
-// }
+vec2 projectCoords(vec3 normal) {
+    vec2 pixelCoords = gl_FragCoord.xy;
+    vec2 reflectCoords = (pixelCoords / uViewSize) * 0.5;
+    vec2 verticalOffset = normal.xy * 0.1;
+    float cameraVerticalAngle = acos(dot(normalize(uCameraPos), vec3(0.0, 1.0, 0.0)));
+    float verticalOffsetFactor = smoothstep(0.0, 1.0, cameraVerticalAngle / (PI / 4.0));
 
-//calculate camera y angle
-float getCameraYAngle(vec3 cameraPos, vec3 cameraTarget) {
-    vec3 cameraDirection = normalize(cameraTarget - cameraPos);
-    return atan(cameraDirection.z, cameraDirection.x);
-}
+    vec2 projectedCoords = reflectCoords + verticalOffset * verticalOffsetFactor;
+    vec2 invertedCoords = vec2(projectedCoords.x, 1.0 - projectedCoords.y);
 
+    // Clamp to avoid artifacts
+    projectedCoords = clamp(projectedCoords, 0.0, 1.0);
 
-vec2 rotateCoords(vec2 vUv){
-    // Define the center of rotation (u, v)
-    vec2 center = vec2(0.5, 0.5); // You can adjust this as needed
+    //more verticalOffsetFactor - more invertedCoords.y
+    float yCoord = mix(invertedCoords.y, projectedCoords.y, 0.0);
 
-    // Define the angle of rotation in radians
-    // float angle = radians(180.0); // You can change the angle as needed
-    float angle = getCameraYAngle(uCameraPos, uCameraTarget) + radians(90.0);
-
-    // Calculate the rotated texture coordinates
-    float s = sin(angle);
-    float c = cos(angle);
-    vec2 rotatedUV = vec2(vUv.x - center.x, vUv.y - center.y);
-    return vec2(rotatedUV.x * c - rotatedUV.y * s, rotatedUV.x * s + rotatedUV.y * c + 0.05) + center;
+    return vec2(projectedCoords.x, yCoord);
 }
 
 // Function to calculate the refraction vector
@@ -86,8 +75,7 @@ void main() {
     float fresnel = mix(0.1, 1.0, pow(1.0 - cosTheta, 5.0)); // Adjust as needed
 
     // Calculate final color based on reflection and refraction
-    // vec3 reflectedColor = texture2D(reflectionTexture, vec2(1.0 - vUv.x, vUv.y)).rgb; // Adjust texture as needed
-    vec3 reflectedColor = texture2D(uReflectionTexture, rotateCoords(vUv)).rgb; // Adjust texture as needed
+    vec3 reflectedColor = texture2D(uReflectionTexture, projectCoords(normal)).rgb; // Adjust texture as needed
     vec3 refractedColor = texture2D(uRefractionTexture, refraction.xy).rgb; // Adjust texture as needed
     vec3 waterColor = mix(refractedColor, reflectedColor, fresnel);
     // vec3 waterColor = reflectedColor;

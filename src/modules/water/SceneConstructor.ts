@@ -76,6 +76,7 @@ export default class SceneConstructor {
     waterMaterial = (sunPosition: THREE.Vector3, cameraPosition: THREE.Vector3, cameraTarget: THREE.Vector3) => {
         const waterShader = {
             uniforms: {
+                uViewSize: { value: new THREE.Vector2(this.frame.clientWidth, this.frame.clientHeight) },
                 uTime: { value: 0.0 },
                 uResolution: { value: new THREE.Vector2() },
                 uUvRate1: { value: new THREE.Vector2(1, 1) },
@@ -135,8 +136,8 @@ export default class SceneConstructor {
         );
         scene.add(water);
 
-        const reflectionTexture = new THREE.WebGLRenderTarget(128 * 8, 128 * 8);
-        const refractionTexture = new THREE.WebGLRenderTarget(128 * 8, 128 * 8);
+        const reflectionTexture = new THREE.WebGLRenderTarget(this.frame.clientWidth, this.frame.clientHeight);
+        const refractionTexture = new THREE.WebGLRenderTarget(this.frame.clientWidth, this.frame.clientHeight);
         (water.material as THREE.ShaderMaterial).uniforms.uReflectionTexture.value = reflectionTexture.texture;
         (water.material as THREE.ShaderMaterial).uniforms.uRefractionTexture.value = refractionTexture.texture;
 
