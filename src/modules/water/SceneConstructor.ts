@@ -1,17 +1,11 @@
 import * as THREE from "three";
 import { WebGLRenderer } from "three";
 import AppStore from "store/AppStore";
-import React from "react";
 // @ts-ignore
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-// @ts-ignore
-// import {ImprovedNoise} from "three/examples/jsm/math/ImprovedNoise";
-// import * as TWEEN from '@tweenjs/tween.js'
 import fragmentShader from "./fragmentShader.glsl";
-// @ts-ignore
 import vertexShader from "./vertexShader.glsl";
 import SkyConstructor from "modules/water/SkyConstructor";
-import { VertexNormalsHelper } from 'three/addons/helpers/VertexNormalsHelper.js';
 
 export default class SceneConstructor {
     frame;
