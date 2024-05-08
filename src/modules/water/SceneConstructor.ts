@@ -83,14 +83,14 @@ export default class SceneConstructor {
     waterMaterial = (sunPosition: THREE.Vector3, cameraPosition: THREE.Vector3, cameraTarget: THREE.Vector3) => {
         const waterShader = {
             uniforms: {
-                time: { value: 0.0 },
-                resolution: { value: new THREE.Vector2() },
-                uvRate1: { value: new THREE.Vector2(1, 1) },
-                sunPosition: { value: sunPosition }, // Pass sun position as a uniform
-                cameraPos: { value: cameraPosition }, // Pass camera position as a uniform
-                cameraTarget: { value: cameraTarget }, // Pass camera target as a uniform
-                reflectionTexture: { value: null }, // Reflection texture
-                refractionTexture: { value: null } // Refraction texture
+                uTime: { value: 0.0 },
+                uResolution: { value: new THREE.Vector2() },
+                uUvRate1: { value: new THREE.Vector2(1, 1) },
+                uSunPosition: { value: sunPosition }, // Pass sun position as a uniform
+                uCameraPos: { value: cameraPosition }, // Pass camera position as a uniform
+                uCameraTarget: { value: cameraTarget }, // Pass camera target as a uniform
+                uReflectionTexture: { value: null }, // Reflection texture
+                uRefractionTexture: { value: null } // Refraction texture
             },
             vertexShader,
             fragmentShader
@@ -146,8 +146,8 @@ export default class SceneConstructor {
 
         const reflectionTexture = new THREE.WebGLRenderTarget(128 * 8, 128 * 8);
         const refractionTexture = new THREE.WebGLRenderTarget(128 * 8, 128 * 8);
-        (water.material as THREE.ShaderMaterial).uniforms.reflectionTexture.value = reflectionTexture.texture;
-        (water.material as THREE.ShaderMaterial).uniforms.refractionTexture.value = refractionTexture.texture;
+        (water.material as THREE.ShaderMaterial).uniforms.uReflectionTexture.value = reflectionTexture.texture;
+        (water.material as THREE.ShaderMaterial).uniforms.uRefractionTexture.value = refractionTexture.texture;
 
         // const reflectionHelper = new THREE.Mesh(
         //     new THREE.PlaneGeometry(128, 80),
@@ -189,10 +189,10 @@ export default class SceneConstructor {
             // reflectionHelper.visible = true;
             water.visible = true;
 
-            (water.material as THREE.ShaderMaterial).uniforms.time.value = time;
-            (water.material as THREE.ShaderMaterial).uniforms.cameraPos.value = this.camera.position;
-            (water.material as THREE.ShaderMaterial).uniforms.cameraPos.value = this.camera.position;
-            (water.material as THREE.ShaderMaterial).uniforms.cameraTarget.value = this.controls.target;
+            (water.material as THREE.ShaderMaterial).uniforms.uTime.value = time;
+            (water.material as THREE.ShaderMaterial).uniforms.uCameraPos.value = this.camera.position;
+            (water.material as THREE.ShaderMaterial).uniforms.uCameraPos.value = this.camera.position;
+            (water.material as THREE.ShaderMaterial).uniforms.uCameraTarget.value = this.controls.target;
 
             meshes.forEach(mesh => {
                 mesh.rotation.y = time;

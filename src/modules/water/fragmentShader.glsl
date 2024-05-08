@@ -1,9 +1,9 @@
-uniform float time;
-uniform vec3 sunPosition;
-uniform sampler2D reflectionTexture;
-uniform sampler2D refractionTexture;
-uniform vec3 cameraPos; // Rename from cameraPosition to avoid redefinition
-uniform vec3 cameraTarget; // Add cameraTarget varying
+uniform float uTime;
+uniform vec3 uSunPosition;
+uniform sampler2D uReflectionTexture;
+uniform sampler2D uRefractionTexture;
+uniform vec3 uCameraPos; // Rename from cameraPosition to avoid redefinition
+uniform vec3 uCameraTarget; // Add cameraTarget varying
 
 varying vec2 vUv;
 varying vec3 vPos;
@@ -38,7 +38,7 @@ vec2 rotateCoords(vec2 vUv){
 
     // Define the angle of rotation in radians
     // float angle = radians(180.0); // You can change the angle as needed
-    float angle = getCameraYAngle(cameraPos, cameraTarget) + radians(90.0);
+    float angle = getCameraYAngle(uCameraPos, uCameraTarget) + radians(90.0);
 
     // Calculate the rotated texture coordinates
     float s = sin(angle);
@@ -72,13 +72,13 @@ void main() {
     vec3 normal = normalize(cross(dX, dY));
 
     // Calculate view direction
-    vec3 viewDir = normalize(cameraPos - vec3(vUv, waterLevel));
+    vec3 viewDir = normalize(uCameraPos - vec3(vUv, waterLevel));
 
     // Calculate incident light direction from the sun
-    vec3 incident = normalize(sunPosition - vec3(vUv, waterLevel));
+    vec3 incident = normalize(uSunPosition - vec3(vUv, waterLevel));
 
     // Calculate reflection and refraction vectors
-    vec3 reflection = calculateReflection(normal, incident, cameraPos);
+    vec3 reflection = calculateReflection(normal, incident, uCameraPos);
     vec3 refraction = calculateRefraction(normal, incident, 1.0 / waterRefractionIndex);
 
     // Calculate the fresnel term (reflection coefficient)
@@ -87,13 +87,13 @@ void main() {
 
     // Calculate final color based on reflection and refraction
     // vec3 reflectedColor = texture2D(reflectionTexture, vec2(1.0 - vUv.x, vUv.y)).rgb; // Adjust texture as needed
-    vec3 reflectedColor = texture2D(reflectionTexture, rotateCoords(vUv)).rgb; // Adjust texture as needed
-    vec3 refractedColor = texture2D(refractionTexture, refraction.xy).rgb; // Adjust texture as needed
+    vec3 reflectedColor = texture2D(uReflectionTexture, rotateCoords(vUv)).rgb; // Adjust texture as needed
+    vec3 refractedColor = texture2D(uRefractionTexture, refraction.xy).rgb; // Adjust texture as needed
     vec3 waterColor = mix(refractedColor, reflectedColor, fresnel);
     // vec3 waterColor = reflectedColor;
 
     // Apply sun effect
-    float sunIntensity = max(0.0, dot(normalize(sunPosition - vec3(vUv, waterLevel)), -reflection));
+    float sunIntensity = max(0.0, dot(normalize(uSunPosition - vec3(vUv, waterLevel)), -reflection));
     sunIntensity = pow(sunIntensity, 20.0); // Adjust for intensity
     vec3 sunColor = vec3(1.0, 1.0, 0.8); // Adjust for color
     waterColor += sunIntensity * sunColor;
